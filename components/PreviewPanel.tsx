@@ -8,11 +8,11 @@ interface PreviewPanelProps {
 }
 
 const Placeholder: React.FC = () => (
-  <div className="text-center">
-    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+  <div className="text-center p-4">
+    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
-    <h3 className="mt-4 text-lg font-medium text-gray-300">Hasil Gambar</h3>
+    <h3 className="mt-4 text-base sm:text-lg font-medium text-gray-300">Hasil Gambar</h3>
     <p className="mt-1 text-sm text-gray-500">
         Gambar yang telah digenerate akan muncul di sini.
     </p>
@@ -20,9 +20,9 @@ const Placeholder: React.FC = () => (
 );
 
 const LoadingState: React.FC = () => (
-  <div className="text-center">
-    <SpinnerIcon className="mx-auto h-16 w-16 text-indigo-400" />
-    <h3 className="mt-4 text-lg font-medium text-gray-300">Sedang Membuat Keajaiban...</h3>
+  <div className="text-center p-4">
+    <SpinnerIcon className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-indigo-400" />
+    <h3 className="mt-4 text-base sm:text-lg font-medium text-gray-300">Sedang Membuat Keajaiban...</h3>
     <p className="mt-1 text-sm text-gray-500">
         AI sedang bekerja, mohon tunggu sebentar.
     </p>
@@ -30,11 +30,11 @@ const LoadingState: React.FC = () => (
 );
 
 const ErrorState: React.FC<{ message: string }> = ({ message }) => (
-    <div className="text-center text-red-400">
-        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <div className="text-center text-red-400 p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 sm:h-16 sm:w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
         </svg>
-        <h3 className="mt-4 text-lg font-medium text-white">Oops! Terjadi Kesalahan</h3>
+        <h3 className="mt-4 text-base sm:text-lg font-medium text-white">Oops! Terjadi Kesalahan</h3>
         <p className="mt-1 text-sm text-red-400/80 break-words max-w-xs mx-auto">
             {message}
         </p>
@@ -100,7 +100,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ isLoading, generatedImages,
               </button>
             </div>
           ) : (
-            <div className="w-full h-full grid grid-cols-2 gap-4 overflow-y-auto p-1">
+            <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto p-1">
               {generatedImages.map((image, index) => (
                 <div key={index} className="relative group aspect-square rounded-lg overflow-hidden">
                   <img
@@ -135,7 +135,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ isLoading, generatedImages,
   };
 
   return (
-    <aside className="w-full md:w-[50%] flex-shrink-0 h-full bg-gray-900 p-8 flex flex-col items-center justify-center border-l border-gray-800 overflow-auto">
+    <aside className="w-full md:w-[50%] flex-shrink-0 h-full bg-gray-900 p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center border-l border-gray-800 overflow-auto">
       <div id="tutorial-preview" className={`w-full h-full max-w-2xl flex flex-col items-center justify-center bg-gray-800 rounded-xl ${generatedImages.length > 0 ? 'p-2' : 'p-4 border-2 border-dashed border-gray-700'}`}>
         {renderContent()}
       </div>

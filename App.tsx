@@ -19,12 +19,18 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem('hasSeenTutorial');
-    if (!hasSeenTutorial) {
+    const isMobile = window.innerWidth < 768;
+    if (!hasSeenTutorial && !isMobile) {
       setIsTutorialActive(true);
     }
   }, []);
 
   const startTutorial = () => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      alert('Fitur tutorial hanya tersedia di tampilan desktop untuk pengalaman terbaik.');
+      return;
+    }
     setCurrentTutorialStep(0);
     setIsTutorialActive(true);
   };
@@ -170,7 +176,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div id="app-container" className="flex flex-col md:flex-row h-screen bg-gray-900 text-gray-200 font-sans">
+    <div id="app-container" className="flex flex-col md:flex-row min-h-screen bg-gray-900 text-gray-200 font-sans pb-28 md:pb-0">
       {isTutorialActive && (
         <Tutorial 
             step={TUTORIAL_STEPS[currentTutorialStep]}

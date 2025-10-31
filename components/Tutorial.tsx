@@ -96,7 +96,7 @@ const Tutorial: React.FC<TutorialProps> = ({
       ></div>
 
       <div
-        className="absolute w-72 bg-gray-800 text-white p-5 rounded-lg shadow-2xl border border-gray-700 transition-all duration-300"
+        className="absolute w-full max-w-sm bg-gray-800 text-white p-5 rounded-lg shadow-2xl border border-gray-700 transition-all duration-300"
         style={{ 
             top: popoverPos.top, 
             left: popoverPos.left,
