@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI, Modality } from "@google/genai";
 import Sidebar from './components/Sidebar';
 import SettingsPanel from './components/SettingsPanel';
 import PreviewPanel from './components/PreviewPanel';
@@ -9,7 +8,7 @@ import { TUTORIAL_STEPS } from './constants';
 
 
 const App: React.FC = () => {
-  const [activeMenu, setActiveMenu] = useState<MenuItemKey>('headshot');
+  const [activeMenu, setActiveMenu] = useState<MenuItemKey>('generate-image');
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,89 +82,26 @@ const App: React.FC = () => {
     setError(null);
     setGeneratedImages([]);
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-
     try {
-        if (menuKey === 'generate-image') {
-            if (!settings.prompt) {
-                throw new Error("Silakan masukkan prompt untuk membuat gambar.");
-            }
-            const response = await ai.models.generateImages({
-                model: 'imagen-4.0-generate-001',
-                prompt: settings.prompt,
-                config: {
-                  numberOfImages: settings.numberOfImages || 1,
-                  aspectRatio: settings.imageAspectRatio || '1:1',
-                  outputMimeType: 'image/png',
-                },
-            });
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image, settings, menuKey }),
+      });
 
-            const images = response.generatedImages?.map(img => img.image?.imageBytes).filter(Boolean) as string[];
+      const result = await response.json();
 
-            if (images.length > 0) {
-                setGeneratedImages(images);
-            } else {
-                throw new Error("Tidak ada gambar yang dihasilkan. Respons API tidak valid.");
-            }
-            return;
-        }
-        
-        if (!image) {
-            throw new Error("Silakan unggah gambar terlebih dahulu untuk mode ini.");
-        }
-
-        let fullPrompt = '';
-        switch (menuKey) {
-            case 'headshot':
-                if (!settings.headshotStyle) {
-                    throw new Error("Silakan pilih gaya headshot.");
-                }
-                fullPrompt = `Generate a professional headshot of the person in this photo. The style should be: ${settings.headshotStyle}. Preserve the person's facial features and likeness accurately. The final image should be a high-quality portrait.`;
-                break;
-            case 'remove-object':
-                fullPrompt = `Remove this from the image: ${settings.prompt}. Fill in the empty space realistically as if the object was never there.`;
-                break;
-            case 'enhance-quality':
-                const levels: { [key: number]: string } = {
-                  1: 'Slightly improve',
-                  2: 'Improve',
-                  3: 'Significantly improve',
-                  4: 'Dramatically improve and upscale'
-                };
-                const enhancementDescription = levels[settings.enhancementLevel || 2];
-                fullPrompt = `${enhancementDescription} the quality, sharpness, and detail of this image. Fix any compression artifacts or blurriness.`;
-                break;
-            case 'change-style':
-                fullPrompt = `Recreate this image in the style of: ${settings.prompt}.`;
-                break;
-        }
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image',
-            contents: {
-                parts: [
-                    {
-                        inlineData: {
-                            data: image.data,
-                            mimeType: image.mimeType,
-                        },
-                    },
-                    {
-                        text: fullPrompt,
-                    },
-                ],
-            },
-            config: {
-                responseModalities: [Modality.IMAGE],
-            },
-        });
-
-        const firstPart = response.candidates?.[0]?.content?.parts?.[0];
-        if (firstPart && firstPart.inlineData) {
-            setGeneratedImages([firstPart.inlineData.data]);
-        } else {
-            throw new Error("Tidak ada gambar yang dihasilkan. Respons API tidak valid.");
-        }
+      if (!response.ok) {
+        throw new Error(result.error || 'Terjadi kesalahan pada server.');
+      }
+      
+      if (result.images && result.images.length > 0) {
+        setGeneratedImages(result.images);
+      } else {
+        throw new Error("Tidak ada gambar yang dihasilkan. Respons dari server tidak valid.");
+      }
 
     } catch (e: any) {
         console.error(e);

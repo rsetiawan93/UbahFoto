@@ -326,6 +326,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
   const [prompt, setPrompt] = useState('');
   const [enhancementLevel, setEnhancementLevel] = useState(2);
   const [headshotStyle, setHeadshotStyle] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
   
   // State for image generation settings
   const [numberOfImages, setNumberOfImages] = useState(1);
@@ -350,6 +351,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
     setCrop(undefined);
     setCompletedCrop(undefined);
     setAspect(activeMenu === 'crop' ? 1 : undefined);
+    setValidationError(null);
   }, [activeMenu]);
 
   useEffect(() => {
@@ -361,10 +363,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
   }, [aspect]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValidationError(null);
     const file = e.target.files?.[0];
     if (file) {
         if (file.size > 10 * 1024 * 1024) {
-            alert("Ukuran file tidak boleh melebihi 10MB.");
+            setValidationError("Ukuran file tidak boleh melebihi 10MB.");
             return;
         }
         setImageFile(file);
@@ -376,9 +379,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
   };
 
   const handleSubmit = async () => {
+    setValidationError(null);
+
     if (activeMenu === 'generate-image') {
-        if (!prompt) {
-            alert("Silakan masukkan deskripsi gambar.");
+        if (!prompt.trim()) {
+            setValidationError("Silakan masukkan deskripsi gambar.");
             return;
         }
         const settings: GenerationSettings = { prompt, numberOfImages, imageAspectRatio };
@@ -387,28 +392,34 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
     }
     
     if (!imageFile) {
-      alert("Silakan unggah gambar terlebih dahulu.");
+      setValidationError("Silakan unggah gambar terlebih dahulu.");
       return;
     }
 
     if (activeMenu === 'crop') {
         if (!completedCrop || !imgRef.current || completedCrop.width === 0) {
-            alert("Silakan pilih area untuk dipangkas.");
+            setValidationError("Silakan pilih area untuk dipangkas.");
             return;
         }
         try {
             const croppedBase64 = await getCroppedImg(imgRef.current, completedCrop);
             onCrop(croppedBase64);
         } catch (e: any) {
-            alert(`Gagal memangkas gambar: ${e.message}`);
+            setValidationError(`Gagal memangkas gambar: ${e.message}`);
         }
         return;
     }
 
     if (activeMenu === 'headshot' && !headshotStyle) {
-      alert("Silakan pilih gaya headshot.");
+      setValidationError("Silakan pilih gaya headshot.");
       return;
     }
+    
+    if ( (activeMenu === 'remove-object' || activeMenu === 'change-style') && !prompt.trim() ) {
+        setValidationError("Silakan isi deskripsi yang diperlukan.");
+        return;
+    }
+
     const imageData = await fileToBase64(imageFile);
     const settings: GenerationSettings = { prompt, enhancementLevel, headshotStyle };
     onGenerate({ data: imageData, mimeType: imageFile.type }, settings, activeMenu);
@@ -446,7 +457,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
     return "Hasilkan Gambar";
   }
   
-  const isButtonDisabled = isLoading || (activeMenu === 'generate-image' ? !prompt : !imageFile);
+  const isButtonDisabled = isLoading;
 
   return (
     <main className="w-full md:w-[30%] flex-shrink-0 bg-gray-800/50 p-4 sm:p-6 md:p-8 overflow-y-auto h-full">
@@ -473,6 +484,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ activeMenu, onGenerate, o
               {renderContent()}
             </div>
         </div>
+        
+        {validationError && (
+            <div className="mt-4 text-center p-3 bg-red-900/50 border border-red-500/50 rounded-lg">
+                <p className="text-sm text-red-300">{validationError}</p>
+            </div>
+        )}
 
         <div className="mt-8">
           <button

@@ -1,6 +1,18 @@
 # Panduan Penerapan ke Google Cloud Run
 
-Dokumen ini menjelaskan langkah-langkah untuk menerapkan aplikasi "Ubah Foto" ke Google Cloud Run. Cloud Run sangat ideal untuk menjalankan aplikasi dalam kontainer, jadi kita akan mengemas aplikasi statis kita ke dalam gambar Docker menggunakan server web Nginx.
+**Catatan Penting:** Struktur aplikasi ini telah dioptimalkan untuk platform serverless seperti Vercel yang dapat menjalankan fungsi backend (API routes) secara otomatis dari direktori `/api`. Panduan di bawah ini adalah untuk versi aplikasi yang lebih lama yang hanya menyajikan file statis dengan Nginx.
+
+Untuk menerapkan versi aplikasi saat ini ke Google Cloud Run, Anda perlu mengganti pendekatan Nginx. Sebagai gantinya, Anda harus membuat server Node.js (misalnya, menggunakan framework seperti Express.js) yang dapat melakukan dua hal:
+1. Menyajikan file-file frontend statis (seperti `index.html`, dll.).
+2. Menangani endpoint backend `/api/generate` untuk berkomunikasi dengan Gemini API.
+
+Ini memerlukan `Dockerfile` yang berbeda yang menginstal dependensi Node.js dari `package.json`, meng-compile TypeScript ke JavaScript (jika diperlukan), dan menjalankan server Node.js Anda. Proses ini lebih kompleks dibandingkan panduan asli di bawah ini.
+
+---
+
+## (Panduan Lama) Menerapkan Versi Statis dengan Nginx
+
+Dokumen ini menjelaskan langkah-langkah untuk menerapkan aplikasi "Ubah Foto" **versi statis-saja** ke Google Cloud Run. Cloud Run sangat ideal untuk menjalankan aplikasi dalam kontainer, jadi kita akan mengemas aplikasi statis kita ke dalam gambar Docker menggunakan server web Nginx.
 
 ## Prasyarat
 
@@ -24,7 +36,10 @@ Buat file baru bernama `Dockerfile` (tanpa ekstensi) di direktori root proyek An
 FROM nginx:alpine
 
 # Salin semua file proyek ke direktori default Nginx untuk menyajikan konten statis
+# Hapus direktori 'api' karena tidak akan digunakan dalam setup Nginx ini
+RUN rm -rf /usr/share/nginx/html/*
 COPY . /usr/share/nginx/html
+RUN rm -rf /usr/share/nginx/html/api /usr/share/nginx/html/node_modules /usr/share/nginx/html/package.json /usr/share/nginx/html/package-lock.json /usr/share/nginx/html/tsconfig.json
 
 # Ekspos port 80, port default untuk Nginx
 EXPOSE 80
@@ -40,6 +55,8 @@ Untuk memastikan file yang tidak perlu tidak disertakan dalam image Docker, buat
 .git
 .gitignore
 docs/
+node_modules/
+api/
 ```
 
 ### 3. Bangun dan Unggah Gambar Docker ke Artifact Registry
@@ -98,12 +115,4 @@ Setelah perintah ini selesai, gcloud akan memberikan URL layanan Anda. Buka URL 
 
 ## Catatan Penting: API Key Gemini
 
-Aplikasi ini menggunakan `process.env.API_KEY` untuk mengakses Gemini API. Di Cloud Run, Anda perlu mengatur variabel lingkungan (environment variable) ini.
-
-1.  Buka layanan Anda di [konsol Google Cloud Run](https://console.cloud.google.com/run).
-2.  Klik "Edit & Deploy New Revision".
-3.  Di bawah tab "Variables & Secrets", klik "Add Variable".
-4.  Masukkan nama `API_KEY` dan value-nya adalah kunci API Gemini Anda.
-5.  Klik "Deploy".
-
-Cloud Run akan membuat revisi baru dengan variabel lingkungan yang telah ditetapkan.
+Karena versi ini tidak memiliki backend, kunci API akan terekspos di sisi klien. Anda **TIDAK BISA** menggunakan environment variable Cloud Run secara langsung di JavaScript frontend. Untuk penggunaan produksi yang aman, sangat disarankan menggunakan arsitektur dengan backend seperti yang telah dioptimalkan untuk Vercel.
