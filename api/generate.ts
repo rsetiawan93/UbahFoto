@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Modality } from "@google/genai";
-import type { GenerationSettings, MenuItemKey } from '../types';
+import type { GenerationSettings, MenuItemKey } from '../src/types';
 
 export default async function handler(
   req: VercelRequest,
