@@ -78,8 +78,7 @@ async function getCroppedImg(
   return canvas.toDataURL('image/png').split(',')[1];
 }
 
-
-const FileInput: React.FC<{
+type FileInputProps = {
   imagePreview: string | null;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   activeMenu: MenuItemKey;
@@ -88,7 +87,9 @@ const FileInput: React.FC<{
   setCompletedCrop: (c: PixelCrop) => void;
   imgRef: React.RefObject<HTMLImageElement>;
   aspect: number | undefined;
-}> = ({ imagePreview, onFileChange, activeMenu, crop, setCrop, setCompletedCrop, imgRef, aspect }) => {
+};
+
+const FileInput: React.FC<FileInputProps> = ({ imagePreview, onFileChange, activeMenu, crop, setCrop, setCompletedCrop, imgRef, aspect }) => {
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     if (aspect) {
       const { width, height } = e.currentTarget;
@@ -158,13 +159,14 @@ const FileInput: React.FC<{
   );
 };
 
-
-const PromptInput: React.FC<{
+type PromptInputProps = {
   label: string;
   placeholder: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-}> = ({ label, placeholder, value, onChange }) => (
+};
+
+const PromptInput: React.FC<PromptInputProps> = ({ label, placeholder, value, onChange }) => (
     <div className="mt-6">
         <label htmlFor="prompt" className="block text-sm font-medium text-gray-400 mb-2">
             {label}
@@ -181,11 +183,12 @@ const PromptInput: React.FC<{
     </div>
 );
 
-
-const HeadshotSettings: React.FC<{
+type HeadshotSettingsProps = {
   selectedStyle: string;
   onStyleSelect: (stylePrompt: string) => void;
-}> = ({ selectedStyle, onStyleSelect }) => (
+};
+
+const HeadshotSettings: React.FC<HeadshotSettingsProps> = ({ selectedStyle, onStyleSelect }) => (
   <div className="mt-6">
     <label className="block text-sm font-medium text-gray-400 mb-2">Pilih Gaya Headshot</label>
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -213,11 +216,21 @@ const HeadshotSettings: React.FC<{
   </div>
 );
 
-const RemoveObjectSettings: React.FC<{ prompt: string; setPrompt: (s: string) }> = ({ prompt, setPrompt }) => (
+type RemoveObjectSettingsProps = {
+    prompt: string;
+    setPrompt: (s: string) => void;
+};
+
+const RemoveObjectSettings: React.FC<RemoveObjectSettingsProps> = ({ prompt, setPrompt }) => (
   <PromptInput label="Deskripsi Objek yang Ingin Dihapus" placeholder="Contoh: Orang yang memakai topi merah di sebelah kiri..." value={prompt} onChange={(e) => setPrompt(e.target.value)} />
 );
 
-const EnhanceQualitySettings: React.FC<{ level: number; setLevel: (n: number) }> = ({ level, setLevel }) => (
+type EnhanceQualitySettingsProps = {
+    level: number;
+    setLevel: (n: number) => void;
+};
+
+const EnhanceQualitySettings: React.FC<EnhanceQualitySettingsProps> = ({ level, setLevel }) => (
   <div className="mt-6">
       <label htmlFor="enhancement-level" className="block text-sm font-medium text-gray-400 mb-2">Tingkat Peningkatan</label>
       <input type="range" id="enhancement-level" name="enhancement-level" min="1" max="4" value={level} onChange={(e) => setLevel(parseInt(e.target.value, 10))} className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
@@ -230,14 +243,21 @@ const EnhanceQualitySettings: React.FC<{ level: number; setLevel: (n: number) }>
   </div>
 );
 
-const ChangeStyleSettings: React.FC<{ prompt: string; setPrompt: (s: string) }> = ({ prompt, setPrompt }) => (
+type ChangeStyleSettingsProps = {
+    prompt: string;
+    setPrompt: (s: string) => void;
+};
+
+const ChangeStyleSettings: React.FC<ChangeStyleSettingsProps> = ({ prompt, setPrompt }) => (
   <PromptInput label="Deskripsi Gaya Artistik" placeholder="Contoh: Lukisan cat minyak, gaya anime, seni piksel..." value={prompt} onChange={(e) => setPrompt(e.target.value)} />
 );
 
-const CropSettings: React.FC<{
-  aspect: number | undefined;
-  setAspect: (n: number | undefined) => void;
-}> = ({ aspect, setAspect }) => {
+type CropSettingsProps = {
+    aspect: number | undefined;
+    setAspect: (n: number | undefined) => void;
+};
+
+const CropSettings: React.FC<CropSettingsProps> = ({ aspect, setAspect }) => {
   const aspectRatios = [
     { name: 'Bebas', value: undefined },
     { name: '1:1', value: 1 / 1 },
@@ -265,14 +285,16 @@ const CropSettings: React.FC<{
   );
 };
 
-const GenerateImageSettings: React.FC<{ 
-  prompt: string; 
-  setPrompt: (s: string);
+type GenerateImageSettingsProps = {
+  prompt: string;
+  setPrompt: (s: string) => void;
   numberOfImages: number;
   setNumberOfImages: (n: number) => void;
   aspectRatio: string;
   setAspectRatio: (r: string) => void;
-}> = ({ prompt, setPrompt, numberOfImages, setNumberOfImages, aspectRatio, setAspectRatio }) => {
+};
+
+const GenerateImageSettings: React.FC<GenerateImageSettingsProps> = ({ prompt, setPrompt, numberOfImages, setNumberOfImages, aspectRatio, setAspectRatio }) => {
     const aspectRatios = [
         { name: 'Persegi (1:1)', value: '1:1' },
         { name: 'Lanskap (16:9)', value: '16:9' },
